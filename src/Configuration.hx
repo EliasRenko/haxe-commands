@@ -1,20 +1,63 @@
 package;
 
-import Cmd;
+import Command;
 import EventDispacher;
 
-class Configuration extends EventDispacher<Cmd> {
+class Configuration extends EventDispacher<Command> {
 
     // ** Publics.
 
-    public var options:Map<String, Cmd> = new Map<String, Cmd>();
+    public var options:Map<String, Command> = new Map<String, Command>();
 
     public function new() {
         
         super();
     }
 
-    public function init():Void {
+    public function parse(args:Array<String>):Void {
+
+        // ** 
+
+        var _lastCommand:Command = null;
+
+        while (args.length > 0) {
+            
+            var arg:String = args.shift();
+
+            if (isCommand(arg)) {
+                
+                var _option:Command = options.get(arg);
+
+                if (_option == null) {
+
+                    throw "Command `" + arg + "` " + "doesn't exist!";
+                }
+                else {
+
+                    _option.value = args.shift();
+
+                    _lastCommand = _option;
+                }
+            } 
+            else {
+                
+                if (_lastCommand == null) {
+                    
+                    var _unknownProperty = arg;
+
+                    continue;
+                }
+
+                if (_lastCommand.propertyExists(arg)) {
+
+                    _lastCommand.addProperty(arg, args.shift());
+                }
+                else throw "Parameter `" + arg + "` " + "doesn't exist!";
+            }
+        }
+    }
+
+    public function parseOld(args:Array<String>):Void {
         
         // ** Local functions.
 
@@ -23,9 +66,7 @@ class Configuration extends EventDispacher<Cmd> {
             return arg.charAt(0) == "-";
         }
 
-        var args:Array<String> = Sys.args();
-
-        var lastOption:Cmd = null;
+        var lastOption:Command = null;
 
         var index:Int = 0;
 
@@ -37,7 +78,7 @@ class Configuration extends EventDispacher<Cmd> {
 
             if (isCommand(arg)) {
 
-                var _option:Cmd = options.get(arg);
+                var _option:Command = options.get(arg);
 
                 if (_option == null) {
 
@@ -67,19 +108,19 @@ class Configuration extends EventDispacher<Cmd> {
         }
     }
 
-    public function addOption(name:String, command:Cmd):Void {
+    public function addOption(name:String, command:Command):Void {
 
         options.set(name, command);
     }
 
-    public function getOption(name:String):Cmd {
+    public function getOption(name:String):Command {
         
         return options.get(name);
     }
 
     public function hasValue(name:String):Bool {
         
-        var _command:Cmd = options.get(name);
+        var _command:Command = options.get(name);
 
         if (_command == null) return false;
 
@@ -98,4 +139,31 @@ class Configuration extends EventDispacher<Cmd> {
             dispatchEvent(option, option.type);
         }
     }
+
+    private inline function isCommand(arg:String):Bool {
+
+        return arg.charAt(0) == "-";
+    }
 }
+
+class StepIterator {
+
+    var end:Int;
+
+    var step:Int;
+
+    var index:Int;
+  
+    public inline function new(start:Int, end:Int, step:Int) {
+
+      this.index = start;
+
+      this.end = end;
+      
+      this.step = step;
+    }
+  
+    public inline function hasNext() return index < end;
+    
+    public inline function next() return (index += step) - step;
+  }

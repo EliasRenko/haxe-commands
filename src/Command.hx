@@ -1,6 +1,6 @@
 package;
 
-class Cmd {
+class Command {
     
     // ** Publics.
 
