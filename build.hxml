@@ -1,0 +1,4 @@
+-cp src
+
+-lib haxe-events
+-lib haxe-unit

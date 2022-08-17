@@ -9,5 +9,5 @@
     "contributors": ["EliasRenko"],
     "tags": [],
     "classPath": "src",
-    "dependencies": { "haxe-events": "" }
+    "dependencies": { "haxe-events": "", "haxe-unit": "" }
 }

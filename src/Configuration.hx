@@ -134,6 +134,8 @@ class Configuration extends EventDispacher<Command> {
 
         for (name => option in options) {
 
+            trace(option.value);
+
             if (option.value == null) continue;
 
             dispatchEvent(option, option.type);
